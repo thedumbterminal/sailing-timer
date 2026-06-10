@@ -5,19 +5,20 @@ from kivy.uix.boxlayout import BoxLayout
 from .race import Race
 from kivy.logger import Logger
 
+
 class SailingApp(App):
     def start_clicked(self, instance):
-        Logger.debug("Start button clicked")
+        Logger.debug("UI: Start button clicked")
         self._race = Race()
         self._race.start()
 
     def stop_clicked(self, instance):
-        Logger.debug("Stop button clicked")
+        Logger.debug("UI: Stop button clicked")
         self._race.stop()
 
     def build(self):
         layout = BoxLayout(padding=10, orientation="vertical")
-        title = Label(text="Sailing app")
+        title = Label(text="Sailing Timer", font_size=40, size_hint=(1, 0.5))
         startButton = Button(text="Start")
         stopButton = Button(text="Stop")
 
