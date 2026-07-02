@@ -12,7 +12,7 @@ https://kivy.org/
 
 ```bash
 script/setup-python.sh
-script/inastall.sh
+script/install.sh
 ```
 
 ## Run
@@ -21,4 +21,11 @@ To run use:
 
 ```bash
 invoke start
+```
+
+Or with reloading:
+
+
+```bash
+invoke dev
 ```

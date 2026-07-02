@@ -3,3 +3,4 @@ kivy[base]
 # dev includes
 black
 invoke
+watchfiles
