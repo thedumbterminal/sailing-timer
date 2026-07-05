@@ -1,4 +1,5 @@
 kivy[base]
+gpiozero
 
 # dev includes
 black
