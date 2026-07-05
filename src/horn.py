@@ -12,7 +12,7 @@ if platform.system() == "Darwin":
 
 class Horn:
     def __init__(self):
-        self._pin = LED(17)
+        self._pin = LED(20)
         Logger.debug("Horn: Created")
 
     def sound(self):

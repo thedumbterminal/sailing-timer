@@ -88,6 +88,7 @@ class Race:
     def add_split(self):
         now = datetime.now()
         self._splits.append(now)
+        self._horn.sound()
         self._debug("Split added at " + str(now))
 
     def get_splits(self):
