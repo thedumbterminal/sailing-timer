@@ -2,11 +2,13 @@ from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
+from kivy.config import Config
 
 from .race import Race
 from kivy.logger import Logger
 from kivy.clock import Clock
 
+Config.read('config.ini')
 
 class SailingApp(App):
     def __init__(self, **kwargs):

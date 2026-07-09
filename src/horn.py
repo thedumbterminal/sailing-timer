@@ -1,7 +1,7 @@
 from kivy.logger import Logger
+from kivy.clock import Clock
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
-from time import sleep
 import platform
 
 if platform.system() == "Darwin":
@@ -18,6 +18,8 @@ class Horn:
     def sound(self):
         Logger.debug("Horn: Sounding")
         self._pin.on()
-        sleep(5)
+        Clock.schedule_once(self._stop, 5)
+
+    def _stop(self, dt):
         self._pin.off()
         Logger.debug("Horn: Sounded")
