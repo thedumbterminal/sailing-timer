@@ -1,8 +1,9 @@
-from kivy.logger import Logger
 from kivy.clock import Clock
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
 import platform
+
+from .Log import Log
 
 if platform.system() == "Darwin":
     from gpiozero.pins.mock import MockFactory
@@ -25,13 +26,14 @@ def singleton(cls):
 class Horn:
     def __init__(self):
         self._pin = LED(20)
-        Logger.debug("Horn: Created")
+        self._log = Log(self)
+        self._log.debug("Created")
 
     def sound(self):
-        Logger.debug("Horn: Sounding")
+        self._log.debug("Sounding")
         self._pin.on()
         Clock.schedule_once(self._stop, 5)
 
     def _stop(self, dt):
         self._pin.off()
-        Logger.debug("Horn: Sounded")
+        self._log.debug("Sounded")

@@ -5,7 +5,6 @@ from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
 
 from .race import Race
-from kivy.logger import Logger
 from kivy.clock import Clock
 
 Config.read("config.ini")
@@ -21,20 +20,27 @@ class SailingApp(App):
         self._elapsed_time_label = None
         self._elasped_interval = None
 
+    def _debug(self, message):
+        Logger.debug(type(self).__name__ + ": " + message)
+
     def _on_race_state_change(self, instance, old_state, new_state):
-        Logger.debug(f"UI: Race state changed")
+        self._debug("Race state changed")
         self.show_elapsed_time(0)  # Update immediately when state changes
         if self._race.is_running():
             self._split_button.disabled = False
+        elif self._race.is_counting_down():
+            self._split_button.disabled = True
+            self._start_button.disabled = True
+            
 
     def show_elapsed_time(self, dt):
-        Logger.debug("UI: Updating elapsed time")
+        self._debug("Updating elapsed time")
         elapsed_time = self._race.get_elapsed_time()
         num_splits = len(self._race.get_splits())
         self._elapsed_time_label.text = f"[{self._race.get_state()}] Elapsed Time: {str(elapsed_time).split('.')[0]} | Splits: {num_splits}"
 
     def start_clicked(self, instance):
-        Logger.debug("UI: Start button clicked")
+        self._debug("Start button clicked")
         instance.disabled = True
         self._race = Race()
         self._race.get_events().bind(on_state_change=self._on_race_state_change)
@@ -46,11 +52,11 @@ class SailingApp(App):
         )  # Update elapsed time every second
 
     def split_clicked(self, instance):
-        Logger.debug("UI: Split button clicked")
+        self._debug("Split button clicked")
         self._race.add_split()
 
     def stop_clicked(self, instance):
-        Logger.debug("UI: Stop button clicked")
+        self._debug("Stop button clicked")
         instance.disabled = True
         Clock.unschedule(self._elasped_interval)
         self._race.stop()
