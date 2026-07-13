@@ -10,6 +10,18 @@ if platform.system() == "Darwin":
     Device.pin_factory = MockFactory()
 
 
+def singleton(cls):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+@singleton
 class Horn:
     def __init__(self):
         self._pin = LED(20)

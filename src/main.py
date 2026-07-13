@@ -8,7 +8,8 @@ from .race import Race
 from kivy.logger import Logger
 from kivy.clock import Clock
 
-Config.read('config.ini')
+Config.read("config.ini")
+
 
 class SailingApp(App):
     def __init__(self, **kwargs):
