@@ -4,7 +4,7 @@ from kivy.clock import Clock
 from .countdown import Countdown
 from .race_events import RaceEvents
 from .horn import Horn
-from .Log import Log
+from .log import Log
 
 
 class Race:
@@ -36,7 +36,7 @@ class Race:
 
     def is_running(self):
         return self.get_state() == "STARTED"
-    
+
     def is_counting_down(self):
         return self.get_state() == "COUNTDOWN"
 
@@ -48,7 +48,7 @@ class Race:
 
     def countdown(self):
         self._start_datetime = datetime.now()
-        self._log.debug("Beginning countdown at " + str(self._start_datetime))
+        self._log.debug("Beginning countdown")
         countdown = Countdown(callback=self.start)
         self._countdowns.append(countdown)
         countdown.begin()
@@ -56,21 +56,24 @@ class Race:
 
     def start(self):
         self._set_state("STARTED")
-        self._log.debug("Started at " + str(datetime.now()))
+        self._log.debug("Started")
 
     def stop(self):
         for timer in self._intervals:
             Clock.unschedule(timer)
         self._finish_datetime = datetime.now()
         self._set_state("FINISHED")
-        self._log.debug("Finished at " + str(self._finish_datetime))
+        self._log.debug("Finished")
         self._horn.sound()
 
     def add_split(self):
         now = datetime.now()
         self._splits.append(now)
-        self._log.debug("Split added at " + str(now))
+        self._log.debug("Split added")
         self._horn.sound()
 
     def get_splits(self):
         return self._splits
+
+    def get_countdowns(self):
+        return self._countdowns

@@ -4,7 +4,7 @@ from datetime import datetime
 
 from kivy.clock import Clock
 from .horn import Horn
-from .Log import Log
+from .log import Log
 
 # Production intervals
 # INTERVALS = [0, 1, 4, 5]
@@ -32,7 +32,9 @@ class Countdown:
     def _set_state(self, new_state):
         old_state = self._state
         self._state = new_state
-        self._log.debug("Countdown: State changed from " + old_state + " to " + new_state)
+        self._log.debug(
+            "Countdown: State changed from " + old_state + " to " + new_state
+        )
 
     def _get_state(self):
         return self._state

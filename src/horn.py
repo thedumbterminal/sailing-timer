@@ -3,7 +3,7 @@ from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
 import platform
 
-from .Log import Log
+from .log import Log
 
 if platform.system() == "Darwin":
     from gpiozero.pins.mock import MockFactory

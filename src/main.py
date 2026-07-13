@@ -4,6 +4,7 @@ from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
 
+from .log import Log
 from .race import Race
 from kivy.clock import Clock
 
@@ -19,28 +20,28 @@ class SailingApp(App):
         self._stop_button = None
         self._elapsed_time_label = None
         self._elasped_interval = None
-
-    def _debug(self, message):
-        Logger.debug(type(self).__name__ + ": " + message)
+        self._log = Log(self)
 
     def _on_race_state_change(self, instance, old_state, new_state):
-        self._debug("Race state changed")
+        self._log.debug("Race state changed")
         self.show_elapsed_time(0)  # Update immediately when state changes
         if self._race.is_running():
             self._split_button.disabled = False
+            self._start_button.disabled = False
+
         elif self._race.is_counting_down():
             self._split_button.disabled = True
             self._start_button.disabled = True
-            
 
     def show_elapsed_time(self, dt):
-        self._debug("Updating elapsed time")
+        self._log.debug("Updating elapsed time")
         elapsed_time = self._race.get_elapsed_time()
         num_splits = len(self._race.get_splits())
-        self._elapsed_time_label.text = f"[{self._race.get_state()}] Elapsed Time: {str(elapsed_time).split('.')[0]} | Splits: {num_splits}"
+        num_countdowns = len(self._race.get_countdowns())
+        self._elapsed_time_label.text = f"[{self._race.get_state()}] Elapsed: {str(elapsed_time).split('.')[0]} | Splits: {num_splits} | Countdowns: {num_countdowns}"
 
     def start_clicked(self, instance):
-        self._debug("Start button clicked")
+        self._log.debug("Start button clicked")
         instance.disabled = True
         self._race = Race()
         self._race.get_events().bind(on_state_change=self._on_race_state_change)
@@ -52,11 +53,11 @@ class SailingApp(App):
         )  # Update elapsed time every second
 
     def split_clicked(self, instance):
-        self._debug("Split button clicked")
+        self._log.debug("Split button clicked")
         self._race.add_split()
 
     def stop_clicked(self, instance):
-        self._debug("Stop button clicked")
+        self._log.debug("Stop button clicked")
         instance.disabled = True
         Clock.unschedule(self._elasped_interval)
         self._race.stop()
@@ -65,10 +66,10 @@ class SailingApp(App):
 
     def build(self):
         layout = BoxLayout(padding=10, orientation="vertical")
-        title = Label(text="Sailing Timer", font_size=40, size_hint=(1, 0.5))
+        title = Label(text="Sailing Timer", font_size=36, size_hint=(1, 0.5))
         layout.add_widget(title)
 
-        self._elapsed_time_label = Label(text="", font_size=20, size_hint=(1, 0.5))
+        self._elapsed_time_label = Label(text="", font_size=16, size_hint=(1, 0.5))
         layout.add_widget(self._elapsed_time_label)
 
         self._start_button = Button(text="Start")
