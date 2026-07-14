@@ -32,9 +32,7 @@ class Countdown:
     def _set_state(self, new_state):
         old_state = self._state
         self._state = new_state
-        self._log.debug(
-            "Countdown: State changed from " + old_state + " to " + new_state
-        )
+        self._log.debug("State changed from " + old_state + " to " + new_state)
 
     def _get_state(self):
         return self._state
@@ -51,11 +49,11 @@ class Countdown:
     def completed(self, dt):
         self._set_state("COMPLETED")
         self._record_timing()
-        self._log.debug("Countdown finished at " + str(dt))
+        self._log.debug("Finished at " + str(dt))
         self._callback()
 
     def begin(self):
-        self._log.debug("Beginning countdown...")
+        self._log.debug("Beginning...")
         for i, interval in enumerate(INTERVALS):
             seconds = interval * 60
             if i < len(INTERVALS) - 1:
@@ -64,5 +62,13 @@ class Countdown:
                 timer = Clock.schedule_once(self.completed, seconds)
             self._intervals.append(timer)
             self._log.debug("Scheduled interval at " + str(seconds) + " seconds")
-        self._set_state("COUNTDOWN")
+        self._set_state("RUNNING")
         self._record_timing()
+
+    def stop(self):
+        for timer in self._intervals:
+            Clock.unschedule(timer)
+        self._set_state("STOPPED")
+
+    def get_state(self):
+        return self._state

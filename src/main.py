@@ -3,10 +3,11 @@ from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
 from kivy.config import Config
+from kivy.clock import Clock, ClockEvent
 
+from .temp_file import TempFile
 from .log import Log
 from .race import Race
-from kivy.clock import Clock
 
 Config.read("config.ini")
 
@@ -14,13 +15,18 @@ Config.read("config.ini")
 class SailingApp(App):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._race = None
-        self._start_button = None
-        self._split_button = None
-        self._stop_button = None
-        self._elapsed_time_label = None
-        self._elasped_interval = None
-        self._log = Log(self)
+        self._race: Race
+        self._start_button: Button
+        self._split_button: Button
+        self._stop_button: Button
+        self._elapsed_time_label: Label
+        self._elasped_interval: ClockEvent
+        self._log: Log = Log(self)
+        self._set_race()
+
+    def _set_race(self):
+        self._race = Race()
+        self._race.get_events().bind(on_state_change=self._on_race_state_change)
 
     def _on_race_state_change(self, instance, old_state, new_state):
         self._log.debug("Race state changed")
@@ -43,8 +49,6 @@ class SailingApp(App):
     def start_clicked(self, instance):
         self._log.debug("Start button clicked")
         instance.disabled = True
-        self._race = Race()
-        self._race.get_events().bind(on_state_change=self._on_race_state_change)
 
         self._race.countdown()
         self._stop_button.disabled = False
@@ -63,6 +67,11 @@ class SailingApp(App):
         self._race.stop()
         self._start_button.disabled = False
         self._split_button.disabled = True
+        temp_file = TempFile()
+        self._race.export(temp_file.get_file())
+        self._log.debug(f"Race results exported to {temp_file.get_file_name()}")
+        # reset race for next run
+        self._set_race()
 
     def build(self):
         layout = BoxLayout(padding=10, orientation="vertical")
@@ -73,15 +82,15 @@ class SailingApp(App):
         layout.add_widget(self._elapsed_time_label)
 
         self._start_button = Button(text="Start")
-        self._start_button.bind(on_press=self.start_clicked)
+        self._start_button.bind(on_press=self.start_clicked)  # type: ignore[attr-defined]
         layout.add_widget(self._start_button)
 
         self._split_button = Button(text="Split", disabled=True)
-        self._split_button.bind(on_press=self.split_clicked)
+        self._split_button.bind(on_press=self.split_clicked)  # type: ignore[attr-defined]
         layout.add_widget(self._split_button)
 
         self._stop_button = Button(text="Stop", disabled=True)
-        self._stop_button.bind(on_press=self.stop_clicked)
+        self._stop_button.bind(on_press=self.stop_clicked)  # type: ignore[attr-defined]
         layout.add_widget(self._stop_button)
 
         return layout

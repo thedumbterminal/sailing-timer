@@ -1,3 +1,4 @@
+import csv
 from datetime import datetime
 from kivy.clock import Clock
 
@@ -40,6 +41,9 @@ class Race:
     def is_counting_down(self):
         return self.get_state() == "COUNTDOWN"
 
+    def is_finished(self):
+        return self.get_state() == "FINISHED"
+
     def get_elapsed_time(self):
         if self.get_state() == "IDLE":
             return None
@@ -47,7 +51,8 @@ class Race:
         return elapsed_time
 
     def countdown(self):
-        self._start_datetime = datetime.now()
+        if self.get_state() == "IDLE":
+            self._start_datetime = datetime.now()
         self._log.debug("Beginning countdown")
         countdown = Countdown(callback=self.start)
         self._countdowns.append(countdown)
@@ -59,8 +64,9 @@ class Race:
         self._log.debug("Started")
 
     def stop(self):
-        for timer in self._intervals:
-            Clock.unschedule(timer)
+        for countdown in self._countdowns:
+            if countdown.get_state() == "COUNTDOWN":
+                countdown.stop()
         self._finish_datetime = datetime.now()
         self._set_state("FINISHED")
         self._log.debug("Finished")
@@ -77,3 +83,22 @@ class Race:
 
     def get_countdowns(self):
         return self._countdowns
+
+    def export(self, file):
+        writer = csv.writer(file)
+        writer.writerow(["Date", "Type"])
+        writer.writerow([self._start_datetime, "START"])
+
+        rows = []
+        for countdown in self._countdowns:
+            for timing in countdown._timings:
+                rows.append((timing.time, "COUNTDOWN " + timing.state))
+        for split in self._splits:
+            rows.append((split, "SPLIT"))
+
+        rows.sort(key=lambda row: row[0])
+        for date, label in rows:
+            writer.writerow([date, label])
+
+        if self.is_finished():
+            writer.writerow([self._finish_datetime, "FINISH"])

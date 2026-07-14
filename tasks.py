@@ -17,3 +17,9 @@ def start(c):
 def dev(c):
     print("Running dev...")
     c.run("watchfiles 'invoke start'")
+
+
+@task
+def typecheck(c):
+    print("Running type checking...")
+    c.run("mypy src")
