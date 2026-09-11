@@ -23,3 +23,14 @@ def dev(c):
 def typecheck(c):
     print("Running type checking...")
     c.run("mypy src")
+
+
+@task
+def syntax(c):
+    print("Checking syntax...")
+    c.run("python -m compileall -q src")
+
+
+@task(syntax)
+def ci(c):
+    print("Running CI tasks...")
