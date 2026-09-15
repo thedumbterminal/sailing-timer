@@ -1,41 +1,33 @@
+import csv
 from datetime import datetime
-import uuid
-from kivy.logger import Logger
 from kivy.clock import Clock
 
+from .countdown import Countdown
 from .race_events import RaceEvents
 from .horn import Horn
-
-# Production intervals
-# INTERVALS = [0, 1, 4, 5]
-
-# Testing intervals
-INTERVALS = [0, 0.5]
+from .log import Log
 
 
 class Race:
     def __init__(self):
-        self._countdown_datetime = None
         self._start_datetime = None
         self._finish_datetime = None
+        self._log = Log(self)
         self._horn = Horn()
+        self._countdowns = []
         self._intervals = []
-        self._id = uuid.uuid4()
         self._state = ""
         self._splits = []
 
         self._events = RaceEvents()
         self._set_state("IDLE")
-        self._debug("Created")
+        self._log.debug("Created")
 
     def _set_state(self, new_state):
         old_state = self._state
         self._state = new_state
-        self._debug("State changed from " + old_state + " to " + new_state)
+        self._log.debug("State changed from " + old_state + " to " + new_state)
         self._events.dispatch("on_state_change", old_state, new_state)
-
-    def _debug(self, message):
-        Logger.debug("Race: " + str(self._id) + ": " + message)
 
     def get_events(self):
         return self._events
@@ -44,51 +36,69 @@ class Race:
         return self._state
 
     def is_running(self):
-        return self.get_state() == "RUNNING"
+        return self.get_state() == "STARTED"
+
+    def is_counting_down(self):
+        return self.get_state() == "COUNTDOWN"
+
+    def is_finished(self):
+        return self.get_state() == "FINISHED"
 
     def get_elapsed_time(self):
         if self.get_state() == "IDLE":
             return None
-        elapsed_time = (
-            self._finish_datetime or datetime.now()
-        ) - self._countdown_datetime
+        elapsed_time = (self._finish_datetime or datetime.now()) - self._start_datetime
         return elapsed_time
 
-    def interval(self, dt):
-        self._debug("Interval at " + str(dt))
-        self._horn.sound()
-
     def countdown(self):
-        self._debug("Beginning countdown...")
-        for i, interval in enumerate(INTERVALS):
-            seconds = interval * 60
-            if i < len(INTERVALS) - 1:
-                timer = Clock.schedule_once(self.interval, seconds)
-            else:
-                timer = Clock.schedule_once(self.start, seconds)
-            self._intervals.append(timer)
-            self._debug("Scheduled interval at " + str(seconds) + " seconds")
-        self._countdown_datetime = datetime.now()
+        if self.get_state() == "IDLE":
+            self._start_datetime = datetime.now()
+        self._log.debug("Beginning countdown")
+        countdown = Countdown(callback=self.start)
+        self._countdowns.append(countdown)
+        countdown.begin()
         self._set_state("COUNTDOWN")
 
-    def start(self, dt):
-        self.interval(dt)
-        self._start_datetime = datetime.now()
-        self._debug("Started at " + str(self._start_datetime))
-        self._set_state("RUNNING")
+    def start(self):
+        self._set_state("STARTED")
+        self._log.debug("Started")
 
     def stop(self):
-        for timer in self._intervals:
-            Clock.unschedule(timer)
+        for countdown in self._countdowns:
+            if countdown.get_state() == "COUNTDOWN":
+                countdown.stop()
         self._finish_datetime = datetime.now()
-        self._horn.sound()
-        self._debug("Stopped at " + str(self._finish_datetime))
         self._set_state("FINISHED")
+        self._log.debug("Finished")
+        self._horn.sound()
 
     def add_split(self):
         now = datetime.now()
         self._splits.append(now)
-        self._debug("Split added at " + str(now))
+        self._log.debug("Split added")
+        self._horn.sound()
 
     def get_splits(self):
         return self._splits
+
+    def get_countdowns(self):
+        return self._countdowns
+
+    def export(self, file):
+        writer = csv.writer(file)
+        writer.writerow(["Date", "Type"])
+        writer.writerow([self._start_datetime, "START"])
+
+        rows = []
+        for countdown in self._countdowns:
+            for timing in countdown._timings:
+                rows.append((timing.time, "COUNTDOWN " + timing.state))
+        for split in self._splits:
+            rows.append((split, "SPLIT"))
+
+        rows.sort(key=lambda row: row[0])
+        for date, label in rows:
+            writer.writerow([date, label])
+
+        if self.is_finished():
+            writer.writerow([self._finish_datetime, "FINISH"])

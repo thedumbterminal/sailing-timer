@@ -1,8 +1,9 @@
-from kivy.logger import Logger
+from kivy.clock import Clock
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
-from time import sleep
 import platform
+
+from .log import Log
 
 if platform.system() == "Darwin":
     from gpiozero.pins.mock import MockFactory
@@ -10,14 +11,29 @@ if platform.system() == "Darwin":
     Device.pin_factory = MockFactory()
 
 
+def singleton(cls):
+    instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in instances:
+            instances[cls] = cls(*args, **kwargs)
+        return instances[cls]
+
+    return get_instance
+
+
+@singleton
 class Horn:
     def __init__(self):
-        self._pin = LED(17)
-        Logger.debug("Horn: Created")
+        self._pin = LED(20)
+        self._log = Log(self)
+        self._log.debug("Created")
 
     def sound(self):
-        Logger.debug("Horn: Sounding")
+        self._log.debug("Sounding")
         self._pin.on()
-        sleep(5)
+        Clock.schedule_once(self._stop, 5)
+
+    def _stop(self, dt):
         self._pin.off()
-        Logger.debug("Horn: Sounded")
+        self._log.debug("Sounded")

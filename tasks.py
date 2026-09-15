@@ -17,3 +17,20 @@ def start(c):
 def dev(c):
     print("Running dev...")
     c.run("watchfiles 'invoke start'")
+
+
+@task
+def typecheck(c):
+    print("Running type checking...")
+    c.run("mypy src")
+
+
+@task
+def syntax(c):
+    print("Checking syntax...")
+    c.run("python -m compileall -q src")
+
+
+@task(syntax)
+def ci(c):
+    print("Running CI tasks...")
