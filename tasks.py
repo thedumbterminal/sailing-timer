@@ -34,3 +34,10 @@ def syntax(c):
 @task(syntax)
 def ci(c):
     print("Running CI tasks...")
+
+@task
+def start_docker(c):
+    print("Running start docker...")
+    c.run("docker buildx build --platform linux/arm64 -t sailing-timer --load .")
+    print("Now run the following command to start the container:")   
+    print("docker run -it -p 2222:22 -p 5901:5901 sailing-timer")   
