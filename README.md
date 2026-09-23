@@ -39,3 +39,5 @@ invoke build-docker
 ```
 
 Then connect via VNC to `vnc://localhost:5901`
+
+Or via SSH `ssh -p 2222 -l pi localhost`

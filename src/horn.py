@@ -1,3 +1,4 @@
+import os
 from kivy.clock import Clock
 from gpiozero import Device, LED
 from gpiozero.pins.mock import MockFactory
@@ -5,7 +6,13 @@ import platform
 
 from .log import Log
 
-if platform.system() == "Darwin":
+def on_mac() -> bool:
+    return platform.system() == "Darwin"
+
+def on_docker() -> bool:
+    return os.path.exists("/.dockerenv")
+
+if on_mac() or on_docker():
     from gpiozero.pins.mock import MockFactory
 
     Device.pin_factory = MockFactory()

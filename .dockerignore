@@ -1,0 +1,6 @@
+.git
+.mypy_cache
+.vscode
+__pycache__
+*.pyc
+design.jpg
