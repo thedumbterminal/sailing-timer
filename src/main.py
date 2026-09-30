@@ -1,16 +1,17 @@
+from kivy.config import Config
+
+Config.read("config.ini")
+
 from kivy.app import App
 from kivy.uix.label import Label
 from kivy.uix.button import Button
 from kivy.uix.boxlayout import BoxLayout
-from kivy.config import Config
 from kivy.clock import Clock, ClockEvent
 from kivy.core.window import Window
 
 from .temp_file import TempFile
 from .log import Log
 from .race import Race
-
-Config.read("config.ini")
 
 # Bluetooth "pointer" clickers are usually presentation remotes: they don't move a
 # real cursor, they emit one of these keystrokes on each press.
@@ -78,7 +79,7 @@ class SailingApp(App):
         for widget in (self._start_button, self._stop_button):
             if widget.collide_point(*touch.pos):
                 return
-        if not self._split_button.disabled:
+        if self._race.is_running():
             self._log.debug("Split triggered by pointer click")
             self._race.add_split()
 
