@@ -82,6 +82,7 @@ class SailingApp(App):
         if self._race.is_running():
             self._log.debug("Split triggered by pointer click")
             self._race.add_split()
+            self.show_elapsed_time(0)
 
     def stop_clicked(self, instance):
         self._log.debug("Stop button clicked")
