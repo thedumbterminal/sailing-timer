@@ -12,6 +12,8 @@ from kivy.core.window import Window
 from .temp_file import TempFile
 from .log import Log
 from .race import Race
+from .http_server import start_file_server
+
 
 # Bluetooth "pointer" clickers are usually presentation remotes: they don't move a
 # real cursor, they emit one of these keystrokes on each press.
@@ -120,4 +122,5 @@ class SailingApp(App):
 
 
 if __name__ == "__main__":
+    start_file_server()
     SailingApp().run()
