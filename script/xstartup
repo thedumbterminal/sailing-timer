@@ -1,0 +1,12 @@
+#!/bin/bash
+# VNC session startup: skip the desktop environment entirely and launch the
+# sailing timer app directly as the only window in the session.
+unset SESSION_MANAGER
+unset DBUS_SESSION_BUS_ADDRESS
+
+[ -r "$HOME/.Xresources" ] && xrdb "$HOME/.Xresources"
+
+export PATH="$HOME/.local/bin:$PATH"
+
+cd /home/pi/sailing-timer
+exec invoke start

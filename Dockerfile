@@ -40,8 +40,11 @@ RUN printf "raspberry\nraspberry\nn\n" | vncpasswd
 COPY --chown=pi:pi . /home/pi/sailing-timer
 RUN pip install --break-system-packages --user -r /home/pi/sailing-timer/requirements.txt
 
+COPY --chown=pi:pi script/xstartup /home/pi/.vnc/xstartup
+RUN chmod +x /home/pi/.vnc/xstartup
+
 USER root
 
 EXPOSE 22 5901
 
-CMD /usr/sbin/sshd && exec su - pi -c "vncserver :1 -geometry 480x320 -depth 24 -localhost no -fg -- xfce4-session"
+CMD ["/bin/sh", "-c", "/usr/sbin/sshd && exec su - pi -c \"vncserver :1 -geometry 480x320 -depth 24 -localhost no -fg\""]
