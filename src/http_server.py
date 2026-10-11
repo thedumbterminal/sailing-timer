@@ -1,10 +1,12 @@
 from http.server import ThreadingHTTPServer, SimpleHTTPRequestHandler
 from functools import partial
 from threading import Thread
+from .temp_file import TempFile
+
 import os
 
 def start_file_server():
-    directory = "/tmp"
+    directory = TempFile.get_temp_directory()
 
     handler = partial(
         SimpleHTTPRequestHandler,
